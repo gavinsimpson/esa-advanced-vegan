@@ -1,9 +1,9 @@
 # Advanced community data analysis using the vegan package in R
 
-Welcome to the GitHub repository for the workshop on advanced community ecology analyses using the `vegan` package at ESA 2016.
+Welcome to the GitHub repository for the workshop on advanced community ecology analyses using the `vegan` package at ESA 2017.
 
 **Location and time:**
-Room 304, Ft Lauderdale Convention Center
+Room A105, Oregon Convention Center, Portland, Oregon
 
 ## Organizers
 
