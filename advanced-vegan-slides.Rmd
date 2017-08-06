@@ -1,0 +1,1104 @@
+---
+title: "Advanced Community Data Analysis Using Vegan"
+author: Gavin L. Simpson
+date: ESA 2017 • Aug 6th 2017
+fontsize: 10pt
+classoption: "compress, aspectratio=169"
+bibliography: vegan-refs.bib
+output:
+  beamer_presentation:
+    theme: m
+    keep_tex: true
+    highlight: tango
+    slide_level: 2
+    template: ./slides-template.tex
+    fig_width: 6
+    fig_height: 3.5
+    fig_crop: false
+    pandoc_args: [
+      "--latex-engine=xelatex"
+    ]
+---
+
+```{r setup-options, echo = FALSE, results = "hide", message = FALSE}
+knitr::opts_chunk$set(comment=NA, fig.align = "center",
+                      out.width = "0.7\\linewidth",
+                      echo = TRUE, message = TRUE, warning = TRUE,
+                      cache = TRUE)
+knitr::knit_hooks$set(crop.plot = knitr::hook_pdfcrop)
+```
+
+```{r packages, echo = FALSE, results = "hide", message = FALSE}
+library("vegan")
+data(varespec)
+data(varechem)
+```
+
+# Preliminaries
+
+## Preliminaries
+
+All slides and materials are online on Git hub:
+
+[https://github.com/gavinsimpson/esa-advanced-vegan-2016]()
+
+# Constrained Ordination
+
+## Canonical Correspondence Analysis
+
+CCA is the constrained form of CA; fitted using `cca()`.
+
+Two interfaces for specifying models
+
+ * basic; `cca1 <- cca(X = varespec, Y = varechem)`
+ * formula; `cca1 <- cca(varespec ~ ., data = varechem)`
+
+Formula interface is the more powerful --- *recommended*
+
+## Canonical Correspondence Analysis
+
+\tiny
+```{r cca-model}
+cca1 <- cca(varespec ~ ., data = varechem)
+cca1
+```
+\normalsize
+
+## Redundancy Analysis
+
+RDA is the constrained form of PCA; fitted using `rda()`.
+
+\tiny
+```{r rda-model}
+rda1 <- rda(varespec ~ ., data = varechem)
+rda1
+```
+\normalsize
+
+## The `cca.object`
+
+ * Objects of class `"cca"` are complex with many components
+ * Entire class described in `?cca.object`
+ * Depending on what analysis performed some components may be `NULL`
+ * Used for (C)CA, PCA, RDA, and CAP (`capscale()`)
+
+## The `cca.object`
+
+`cca1` has a large number of components
+
+ * **`$call`** how the function was called
+ * **`$grand.total`** in (C)CA sum of `rowsum}
+ * **`$rowsum`** the row sums
+ * **`$colsum`** the column sums
+ * **`$tot.chi`** total inertia, sum of Eigenvalues
+ * **`$pCCA`** Conditioned (partial-ed out) components
+ * **`$CCA`** Constrained components
+ * **`$CA`** Unconstrained components
+ * **`$method`** Ordination method used
+ * **`$inertia`** Description of what inertia is
+
+## The `cca.object`
+
+Depending on how one called `cca()` etc some of these components will be `NULL`
+
+`$pCCA` is only filled in if a *partial* constrained ordination fitted
+
+`rda()` returns objects with classes `"rda"` and `"cca"`, but in most cases those objects work like those of class `"cca"`
+
+The Eigenvalues and axis scores are now spread about the `$CA` and `$CCA` components (also `$pCCA` if a *partial* CCA)
+
+Thankfully we can use *extractor* functions to get at such things
+
+## Eigenvalues
+
+Use `eigenvals()` to extract Eigenvalues from a fitted ordination object
+
+
+\scriptsize
+```{r eigenvals}
+eigenvals(cca1)
+```
+\normalsize
+
+## Your turn
+
+- Fit a CCA model to the lichen pasture data. The model should include, N, P, and K only.
+- Save the model in object `mycca1`
+- How much variance is explained by this model?
+- Extract the eigenvalues, how many constrained axes are there?
+
+```{r your-turn-fit-cca}
+library("vegan")
+data(varechem, varespec)
+## ...your code here...
+```
+
+## Extracting axis scores
+
+To extract a range of scores from  a fitted ordination use `scores()`
+
+ * takes an ordination object as the first argument
+ * `choices` --- which axes? Defaults to `c(1,2)`
+ * `display` --- which type(s) of scores to return
+    - `"sites"` or `"wa"`: scores for samples in response matrix
+    - `"species"`: scores for variables/columns in response
+    - `"lc"`: linear combination site scores
+    - `"bp"`: biplot scores (coords of arrow tip)
+    - `"cn"`: centroid scores (coords of factor centroids)
+
+## Extracting axis scores
+
+\scriptsize
+```{r scores}
+str(scores(cca1, choices = 1:4, display = c("species","sites")), max = 1)
+head(scores(cca1, choices = 1:2, display = "sites"))
+```
+\normalsize
+
+## Scalings...
+
+When we draw the results of many ordinations we display 2 or more sets of data
+
+Can't display all of these and maintain relationships between the scores
+
+*Solution* scale one set of scores relative to the other via the `scaling` argument
+
+ * `scaling = 1` --- Focus on sites, scale site scores by $\lambda_i$
+ * `scaling = 2` --- Focus on species, scale species scores by $\lambda_i$
+ * `scaling = 3` --- Symmetric scaling, scale both scores by $\sqrt{\lambda_i}$
+ * `scaling = -1` --- As above, but
+ * `scaling = -2` --- For `cca()` multiply results by $\sqrt{(1/(1-\lambda_i))}$
+ * `scaling = -3` --- this is Hill's scaling
+ * `scaling < 0` --- For `rda()` divide species scores by species' $\sigma$
+ * `scaling = 0` --- raw scores
+ 
+
+\scriptsize
+```{r scaling-example, results = "hide"}
+scores(cca1, choices = 1:2, display = "species", scaling = 3)
+```
+\normalsize
+
+## Scalings...
+
+Thankfully we can use alternative descrpitors to extract scores:
+
+- `"none"`
+- `"sites"`
+- `"species"`
+- `"symmetric"`
+
+Two modifiers select negative scores depending on whether the model is CCA or RDA:
+
+- `hill = TRUE`
+- `correlation = TRUE`
+
+## Your turn
+
+- Using the CCA model you fitted, extract the site scores for axes 2 and 3 with Hill's scaling
+
+## Partial constrained ordinations
+
+*Partial* constrained ordinations remove the effect of one or more variables *then* fit model of interest
+
+Argument `Z` is used for a data frame of variables to partial out
+
+Or with the formula interface use the `Condition()` function
+
+\scriptsize
+```{r partial-ordination}
+pcca <- cca(X = varespec,
+            Y = varechem[, "Ca", drop = FALSE],
+            Z = varechem[, "pH", drop = FALSE])
+pcca <- cca(varespec ~ Ca + Condition(pH), data = varechem) ## easier!
+```
+\normalsize
+
+## Triplots
+
+Triplots will generally produce a mess; we can really only display a couple of bits approximately anyway Trying to cram three things in is a recipe for a mess... but we can do it
+
+\scriptsize
+```{r triplot-1, fig.height = 5, crop.plot = TRUE, out.width = "0.5\\linewidth"}
+plot(cca1)
+```
+\normalsize
+
+## Your turn
+
+- Using `mycca`, draw a triplot of axes 2 and 3 with sites scaling
+- Use the help file `?plot.cca` to help you work out how to do this
+
+## Building constrained ordination models
+
+If we don't want to think it's easy to fit a poor model with many constraints
+
+That's what I did with `cca1` and `rda1`
+
+Remember, CCA and RDA are *just regression methods* --- everything you know about regression applies here
+
+A better approach is to *think* about the important variables and include only those
+
+The formula interface allows you to create interaction or quadratic terms easily (though be careful with latter)
+
+It also handles factor or class constraints automatically unlike the basic interface
+
+## Building constrained ordination models
+
+\scriptsize
+```{r cca-model-build1}
+vare.cca <- cca(varespec ~ Al + P*(K + Baresoil), data = varechem)
+vare.cca
+```
+\normalsize
+
+## Building constrained ordination models
+
+For CCA we have little choice but to do
+
+ 1. Fit well-chosen set of candidate models & compare, or
+ 2. Fit a *full* model of well-chosen variables & then do stepwise selection
+
+But automatic approaches to model building should be used cautiously!
+
+The standard `step()` function can be used as **vegan** provides two helper methods, `deviance()` and `extractAIC()`, used by `step()`
+
+Vegan also provides methods for class `"cca"` for `add1()` and `drop1()`
+
+## Variance inflation factors
+
+*Linear* dependencies between constraints can be investigated via the *variance inflation factor* or VIF
+
+VIF is a measure of how much the variance of $\hat{\beta}_j$ is inflated by presence of other covariates
+
+Lots of rules of thumb
+
+ * VIF >= 20 indicates *strong collinearity* in constraints
+ * VIF >= 10 potentially of concern & should be looked at
+
+Computed via `vif.cca()`
+
+## Stepwise selection in CCA
+
+`step()` uses AIC which is a fudge for RDA/CCA. Alternatively use function `ordistep()`
+
+ 1. Define an upper and lower model scope, say the full model and the null model
+ 2. To step from the lower scope or null model we use
+
+\scriptsize
+```{r stepwise-1}
+upr <- cca(varespec ~ ., data = varechem)
+lwr <- cca(varespec ~ 1, data = varechem)
+set.seed(1)
+mods <- ordistep(lwr, scope = formula(upr), trace = 0)
+```
+\normalsize
+
+`trace = 0` is used her to turn off printing of progress
+
+Permutation tests are used (more on these later); the theory for an AIC for ordination is somewhat loose
+
+## Stepwise selection in CCA
+
+The object returned by `step()` is a standard `"cca"` object with an extra component `$anova`
+
+The `$anova` component contains a summary of the steps involved in automatic model building
+
+\tiny
+```{r stepwise-cca}
+mods
+```
+\normalsize
+
+## Stepwise selection in CCA
+
+The `$anova` component contains a summary of the steps involved in automatic model building
+
+\scriptsize
+```{r stepwise-anova}
+mods$anova
+```
+\normalsize
+
+## Stepwise selection in CCA
+
+Step-wise model selection is fairly fragile; if we start from the full model we won't end up with the same final model
+
+\tiny
+```{r stepwise-reverse}
+mods2 <- step(upr, scope = list(lower = formula(lwr), upper = formula(upr)), trace = 0,
+              test = "perm")
+mods2
+```
+\normalsize
+
+## Adjusted $R^2$ for *linear* models
+
+As with ordinary $R^2$, that of an RDA is biased for the same reasons as for a linear regression
+
+ * adding a variable to constraints will increase $R^2$
+ * the larger the number of constraints in the model the larger $R^2$ is due to random correlations
+
+Can attempt to account for this bias via an *adjusted* $R^2$ measure
+
+$$R^2_{adj} = 1 - \frac{n - 1}{n - m - 1}(1 - R^2)$$
+
+ * $n$ is number of samples $m$ is number of constraints (model degrees of freedom)
+ * Can be used up to $\sim M > n/2$ before becomes too conservative
+ * Can be negative
+ * Compute using `RsquareAdj()`
+
+## Stepwise selection via adjusted $R^2$
+
+The problems with stepwise selection in regression models are myriad. Affects RDA, CCA, etc as well
+
+@Blanchet2008 proposed a two-step solution for models where $R^2_{adj}$ makes sense
+
+ * *Global test* of all constraints
+     - Proceed **only** if this test is significant
+     - Helps prevent inflation of overall type I error
+ * Proceed with forward selection, but with *two* stopping rules
+     - Usual significance threshold $\alpha$
+     - The global $R^2_{adj}$
+     - Stop if next candidate model is non-significant or if $R^2_{adj}$ exceeds the global $R^2_{adj}$
+
+Available in `ordiR2step()`
+
+# Permutation tests
+
+## Permutation tests in vegan
+
+RDA has lots of theory behind it, CCA not as much. However, ecological/environmental data invariably violate what little theory we have
+
+Instead we use permutation tests to assess the *importance* of fitted models --- the data are shuffled in some way and the model refitted to derive a Null distribution under some hypothesis of *no effect*
+
+## Permutation tests in vegan
+
+What *is* shuffled and *how* is of **paramount** importance for the test to be valid
+
+ * No conditioning (partial) variables then rows of the species data are permuted
+ * With conditioning variables, two options are available, both of which *permute residuals* from model fits
+     - The *full model* uses residuals from model $Y = X + Z + \varepsilon$
+     - The *reduced model* uses residuals from model $Y = X + Z + \varepsilon$
+ * In **vegan** which is used can be set via argument `model` with `"direct"`, ~~`"full"`~~, and `"reduced"` respectively
+ * In current **vegan** option `method = "full"` is disabled
+
+## Permutation tests in vegan
+
+A test statistic is required, computed for observed model & each permuted model
+
+**vegan** uses a pseudo-$F$ statistic
+
+$$F=\frac{\chi^2_{model} / df_{model}}{\chi^2_{resid} / df_{resid}}$$
+
+Evaluate whether $F$ is unusually large relative to the null (permutation) distribution of $F$
+
+## Permutation tests in vegan: `anova()`
+
+ * The main user function is the `anova()` method
+ * It is an interface to the lower-level function `permutest.cca()`
+ * At its most simplest, the \texttt{anova()} method tests whether the ``model'' as a whole is significant
+   $$F = \frac{1.4415 / 14}{0.6417 / 9} = 1.4441$$
+
+\tiny
+```{r cca-anova}
+set.seed(42)
+(perm <- anova(cca1))
+```
+\normalsize
+
+## Permutation tests in vegan: `anova()`
+
+ * `anova.cca()` has a number of arguments
+
+\tiny
+```{r anova-args}
+args(anova.cca)
+```
+\normalsize
+
+ * `object` is the fitted ordination
+ * `permutations` controls what is permuted and how
+ * `by` determines what is tested; the default is to test the model
+
+## Types of permutation test in vegan
+
+A number of types of test can be envisaged
+
+ * Testing the overall significance of the model
+ * Testing constrained (canonical) axes
+ * Testing individual model terms *sequentially*
+ * The *marginal* effect of a single variable
+
+The first is the default in `anova()`
+
+The other three can be selected via the argument `by`
+
+## Permutation tests | testing canonical axes
+
+ * The constrained (canonical) axes can be individually tests by specifying `by = "axis"`
+ * The first axis is tested in terms of variance explained compared to residual variance
+ * The second axis is tested after partialling out the first axis... and so on
+
+\tiny
+```{r anova-by-axis}
+set.seed(1)
+anova(mods, by = "axis")
+```
+\normalsize
+
+## Permutation tests | testing terms sequentially
+
+ * The individual terms in the model can be tested using `by = "terms"`
+ * The terms are assessed in the order they were specified in the model, sequentially from first to last
+ * Test is of the additional variance explained by adding the $k$th variable to the model
+ * **Ordering of the terms** will affect the results
+
+\tiny
+```{r anova-by-term}
+set.seed(5)
+anova(mods, by = "terms")
+```
+\normalsize
+
+## Permutation tests | testing terms marginal effects
+
+ * The marginal *effect* of a model term can be assessed using `by = "margin"`
+ * The marginal *effect* is the effect of a particular term when all other model terms are included in the model
+
+\tiny
+```{r anova-by-margin}
+set.seed(10)
+anova(mods, by = "margin")
+```
+\normalsize
+
+# Your turn - Spring meadows
+
+## Constrained ordination worked example | spring meadow vegetation
+
+Example & data taken from Leps & Smilauer, Case Study 2
+
+Spring fen meadow vegetation in westernmost Carpathian mountains
+
+\scriptsize
+```{r meadows-setup}
+## load vegan
+library("vegan")
+
+## load the data
+spp <- read.csv("data/meadow-spp.csv", header = TRUE, row.names = 1)
+env <- read.csv("data/meadow-env.csv", header = TRUE, row.names = 1)
+```
+\normalsize
+
+## Constrained ordination worked example | spring meadow vegetation
+
+CCA a reasonable starting point as the gradient is long here (check with `decorana()` if you want)
+
+
+\scriptsize
+```{r meadows-cca-full}
+m1 <- cca(spp ~ ., data = env)
+set.seed(32)
+anova(m1)
+```
+\normalsize
+
+## Constrained ordination worked example | spring meadow vegetation
+
+\scriptsize
+```{r meadows-cca-full-triplot, fig.height = 5, crop.plot = TRUE, out.width = "0.5\\linewidth"}
+plot(m1)
+```
+\normalsize
+
+## Constrained ordination worked example | spring meadow vegetation
+
+\tiny
+```{r meadows-cca-stepwise}
+set.seed(67)
+lwr <- cca(spp ~ 1, data = env)
+m2 <- ordistep(lwr, scope = formula(m1), trace = FALSE)
+m2
+```
+\normalsize
+
+## Constrained ordination worked example | spring meadow vegetation
+
+\scriptsize
+```{r meadows-cca-reduced-triplot, fig.height = 5, crop.plot = TRUE, out.width = "0.5\\linewidth"}
+plot(m2)
+```
+\normalsize
+
+## Constrained ordination worked example | spring meadow vegetation
+
+\scriptsize
+```{r meadows-cca-anova}
+m2$anova
+```
+\normalsize
+
+## Constrained ordination worked example | spring meadow vegetation
+
+Alternative is RDA with a transformation
+
+\scriptsize
+```{r meadows-rda}
+spph <- decostand(spp, method = "hellinger")
+m3 <- rda(spph ~ ., data = env)
+lwr <- rda(spph ~ 1, data = env)
+m4 <- ordistep(lwr, scope = formula(m3), trace = FALSE)
+```
+\normalsize
+
+## Constrained ordination worked example | spring meadow vegetation
+
+\scriptsize
+```{r meadows-rda-reduced-triplot, fig.height = 5, crop.plot = TRUE, out.width = "0.5\\linewidth"}
+plot(m4)
+```
+\normalsize
+
+## Constrained ordination worked example | spring meadow vegetation
+
+Stepwise using $R^2_{adj}$
+
+\scriptsize
+```{r meadows-rda-adjrsquare}
+m5 <- ordiR2step(lwr, scope = formula(m3), trace = FALSE)
+m5$anova
+```
+\normalsize
+
+# Restricted permutation tests
+
+## Restricted permutation tests
+
+What *is* shuffled and *how* is of **paramount** importance for the test to be valid
+
+Complete randomisation (default in **vegan**) assumes a null hypothesis where all observations are *independent*
+
+Ecological / environmental data often aren't independent
+
+ * Temporal or spatial correlation
+ * Clustering, repeated measures
+ * Nested sampling designs (Split-plots designs)
+ * Blocks
+ * ...
+
+Permutation *must* give null distribution of the test statistic whilst preserving the *dependence* between observations
+
+Trick is to shuffle the data whilst preserving that dependence
+
+## Restricted permutations
+
+Canoco has had restricted permutations for a *long* time. **vegan** has only recently caught up & we're not (quite) there yet
+
+**vegan** used to only know how to completely randomise data or completely randomise within blocks (via `strata` in **vegan**)
+
+The newish package **permute** grew out of initial code in the **vegan** repository to generate the sorts of restricted permutations available in Canoco
+
+We have now fully integrated **permute** into **vegan**...
+
+**vegan** depends on **permute** so it will already be installed & loaded when using **vegan**
+
+## Restricted permutations with permute
+
+**permute** follows Canoco closely --- at the chiding of Cajo ter Braak when it didn't do what he wanted!
+
+Samples can be thought of as belonging to three levels of a hierarchy
+
+ * the *sample* level; how are individual samples permuted
+ * the *plot* level; how are samples grouped at an intermediate level
+ * the *block* level; how are samples grouped at the outermost level
+
+Blocks define groups of plots, each of which can contain groups of samples
+
+## Restricted permutations with permute
+
+Blocks are *never* permuted; if defined, only plots or samples *within* the blocks get shuffled & samples are **never** swapped between blocks
+
+Plots or samples within plots, or both can be permuted following one of four simple permutation types
+
+ 1. Free permutation (randomisation)
+ 2. Time series or linear transect, equal spacing
+ 3. Spatial grid designs, equal regular spacing
+ 4. Permutation of plots (groups of samples)
+ 5. Fixed (no permutation)
+
+Multiple plots per block, multiple samples per plot; plots could be arranged in a spatial grid and samples within each of the plots form a time series
+
+## Restricted permutations with permute | blocks
+
+Blocks are a random factor that does not interact with factors that vary within blocks
+
+Blocks form groups of samples that are never permuted between blocks, only within blocks
+
+Using blocks you can achieve what the `strata` argument used to in **vegan**; needs to be a factor variable
+
+The variation *between* blocks should be excluded from the test; **permute** doesn't do this for you!
+
+Use `+ Condition(blocks)` in the model formula where `blocks` is a factor containing the block membership for each observation
+
+## Restricted permutations with permute | time series & linear transects
+
+Can link *randomly* starting point of one series to any time point of another series if series are stationary under null hypothesis that the series are unrelated
+
+Achieve this via cyclic shift permutations --- wrap series into a circle by joining start and end points
+
+\includegraphics[width=\linewidth]{cyclic-shifts-figure}
+
+## Restricted permutations with permute | time series & linear transects
+
+Works OK if there are no trends or cyclic pattern --- autocorrelation structure only broken at the end points *if* series are stationary
+
+Can detrend to make series stationary but not if you want to test significance of a trend
+
+\scriptsize
+```{r shuffle-time-series}
+shuffle(10, control = how(within = Within(type = "series")))
+```
+\normalsize
+
+## Restricted permutations with permute | spatial grids
+
+\columnsbegin
+\column{0.5\linewidth}
+The trick of cyclic shifts can be extended to two dimensions for a regular spatial grid arrangement of points
+
+Now shifts are *toroidal* as we join the end point in the *x* direction together and in the *y* direction together
+
+\scriptsize
+```{r set-up-toroidal, include = FALSE}
+set.seed(4)
+h <- how(within = Within(type = "grid", ncol = 3, nrow = 3))
+perm <- shuffle(9, control = h)
+```
+
+```{r show-toroidal}
+matrix(perm, ncol = 3)
+```
+\normalsize
+
+\column{0.5\linewidth}
+\includegraphics[width=\linewidth]{Toroidal_coord}
+
+Source: Dave Burke, Wikimedia \ccby
+\columnsend
+
+## Restricted permutations with permute | whole-plots & split-plots I
+
+Split-plot designs are hierarchical with two levels of units
+
+ 1. **whole-plots** , which contain
+ 2. **split-plots** (the samples)
+
+Can permute one or both of these but whole-plots must be of equal size
+
+Essentially allows more than one error stratum to be analyzed
+
+Test effect of constraints that vary *between* whole plots by permuting the whole-plots whilst retaining order of split-splots (samples) within the whole-plots
+
+Test effect of constraints that vary *within* whole-plots by permuting the split-plots within whole-plots without permuting the whole-plots
+
+## Restricted permutations with permute | whole-plots & split-plots II
+
+Whole-plots or split-plots can be time series, linear transects or rectangular grids in which case the appropriate restricted permutation is used
+
+If the split-plots are parallel time series & `time` is an autocorrelated error component affecting all series then the same cyclic shift can be applied to each time series (within each whole-plot) (`constant = TRUE`)
+
+## Restricted permutations with permute | mirroring
+
+Mirroring in restricted permutations allows for isotropy in dependencies by reflecting the ordering of samples in time or spatial dimensions
+
+For a linear transect, technically the autocorrelation at lag *h* is equal to that at lag -*h* (also in a trend-free time series)
+
+\includegraphics[width=\linewidth]{cyclic-shifts-with-mirror-figure}
+
+## Restricted permutations with permute | mirroring
+
+Hence the series `(1, 2, 3, 4)` and `(4, 3, 2, 1)` are equivalent fom this point of view & we can draw permutations from either version
+
+Similar argument can be made for spatial grids
+
+Using `mirror = TRUE` then can double (time series, linear transects) or quadruple (spatial grids) the size of the set of permutations
+
+## Restricted permutations with permute | the set of permutations
+
+Using restricted permutations can severely reduce the size of the set of allowed permutations
+
+As the minimum *p* value obtainable is $1 / np$ where $np$ is number of allowed permutations (including the observed) this can impact the ability to detect signal/pattern
+
+If we don't want mirroring
+
+ * in a time series of 20 samples the minimum *p* is 1/20 (0.05)
+ * in a time series of 100 samples the minimum *p* is 1/100 (0.01)
+ * in a data set with 10 time series each of 20 observations (200 total), if we assume an autocorrelated error component over all series (`constant = TRUE`) then there are only 20 permutations of the data and minimum *p* is 0.05
+
+When the set of permutations is small it is better to switch to an exact test & evaluate all permutations in the set rather than randomly sample from the set
+
+## Restricted permutations with permute | designing permutation schemes
+
+In **permute**, we set up a permutation scheme with `how()`
+
+We sample from the permutation scheme with
+
+ * `shuffle()`, which gives a single draw from scheme, or
+ * `shuffleSet()`, which returns a set of `n` draws from the scheme
+
+`allPerms()` can generated the entire set of permutations --- **note** this was designed for small sets of permutations & is slow if you request it for a scheme with many thousands of permutations!
+
+## Restricted permutations with permute | designing permutation schemes
+
+`how()` has three main arguments
+
+ 1. `within` --- takes input from helper `Within()`
+ 2. `plots`  --- takes input from helper `Plots()`
+ 3. `blocks` --- takes a factor variable as input
+ 
+\scriptsize
+```{r}
+plt <- gl(3, 10)
+h <- how(within = Within(type = "series"), plots = Plots(strata = plt))
+```
+\normalsize
+
+## Restricted permutations with permute | designing permutation schemes
+
+Helper functions make it easy to change one or a few aspects of permutation scheme, rest left at defaults
+
+\scriptsize
+```{r helper-funs}
+args(Within)
+args(Plots)
+```
+\normalsize
+
+## Restricted permutations with permute | designing permutation schemes
+
+`how()` has additional arguments, many of which control the heuristics that kick in to stop you shooting yourself in the foot and demanding 9999 permutations when there are only 10
+
+ * `complete` should we enumerate the entire set of permutations?
+ * `minperm` lower bound on the size of the set of permutations at & below which we turn on complete enumeration
+
+\scriptsize
+```{r how-args}
+args(how)
+```
+\normalsize
+
+## Restricted permutations with permute | time series example I
+
+Time series within 3 plots, 10 observation each
+
+\scriptsize
+```{r ts-perm-example1}
+plt <- gl(3, 10)
+h <- how(within = Within(type = "series"),
+         plots = Plots(strata = plt))
+set.seed(4)
+p <- shuffle(30, control = h)
+do.call("rbind", split(p, plt)) ## look at perms in context
+```
+\normalsize
+
+## Restricted permutations with permute | time series example II
+
+Time series within 3 plots, 10 observation each, same permutation within each
+
+\scriptsize
+```{r ts-perm-example2}
+plt <- gl(3, 10)
+h <- how(within = Within(type = "series", constant = TRUE),
+         plots = Plots(strata = plt))
+set.seed(4)
+p <- shuffle(30, control = h)
+do.call("rbind", split(p, plt)) ## look at perms in context
+```
+\normalsize
+
+# Ohraz Case Study
+
+## Restricted permutations with permute | worked example with vegan
+
+Now we've seen how to drive **permute**, we can use the same `how()` commands to set up permutation designs within **vegan** functions
+
+Analyse the Ohraz data Case study 5 of Leps & Smilauer
+
+Repeated observations of composition from an experiment
+
+* Factorial design (3 replicates)
+* Treatments: fertilisation, mowing, *Molinia* removal
+
+Test 1 of the hypotheses
+
+> There are *no* directional changes in species composition in time that are common to all treatments or specific treatments
+
+## Restricted permutations with permute | worked example with vegan
+
+Analyse the Ohraz data Case study 5 of Leps & Smilauer
+
+\scriptsize
+```{r worked-example-devel-1}
+## load vegan
+library("vegan")
+
+## load the data
+spp <- read.csv("data/ohraz-spp.csv", header = TRUE, row.names = 1)
+env <- read.csv("data/ohraz-env.csv", header = TRUE, row.names = 1)
+molinia <- spp[, 1]
+spp <- spp[, -1]
+
+## Year as numeric
+env <- transform(env, year = as.numeric(as.character(year)))
+```
+\normalsize
+
+## Restricted permutations with permute | worked example with vegan
+
+\scriptsize
+```{r worked-example-devel-2}
+c1 <- rda(spp ~ year + year:mowing + year:fertilizer + year:removal + Condition(plotid), data = env)
+(h <- how(within = Within(type = "none"), plots = Plots(strata = env$plotid, type = "free")))
+```
+
+## Restricted permutations with permute | worked example with vegan
+
+\scriptsize
+```{r worked-example-devel-2a}
+set.seed(42)
+anova(c1, permutations = h, model = "reduced")
+```
+
+## Restricted permutations with permute | worked example with vegan
+
+\scriptsize
+```{r worked-example-devel-2b}
+set.seed(24)
+anova(c1, permutations = h, model = "reduced", by = "axis")
+```
+\normalsize
+
+# Hierarchical analysis of crayfish
+
+## Hierarchical analysis of crayfish
+
+Variation in communities may exist at various scales, sometimes hierarchically
+
+A firt step in understanding this variation is to test for its exisistence
+
+In this example from Leps & Smilauer (2014) uses crayfish data from Spring River, Arkansas/Missouri, USA, collected by Dr.~Camille Flinders.
+
+567 records of 5 species (each sub-divided into *Large* & *Small* individuals 
+
+## Hierarchical analysis of crayfish
+```{r load-crayfish}
+## load data
+crayfish <- head(read.csv("data/crayfish-spp.csv")[, -1], -1)
+design <- read.csv("data/crayfish-design.csv", skip = 1)[, -1]
+
+## fixup the names
+names(crayfish) <- gsub("\\.", "", names(crayfish))
+names(design) <- c("Watershed", "Stream", "Reach", "Run",
+                   "Stream.Nested", "ReachNested", "Run.Nested")
+```
+
+## Hierarchical analysis of crayfish --- Unconstrained
+
+Number of samples have 0 crayfish, which excludes unimodal methods
+
+\scriptsize
+```{r crayfish-unconstrained}
+m.pca <- rda(crayfish)
+summary(eigenvals(m.pca))
+```
+\normalsize
+
+## Hierarchical analysis of crayfish --- Unconstrained
+\scriptsize
+```{r crayfish-pca-plot, fig.width = 16, fig.height = 7.5, fig.show = "hold", crop.plot = TRUE}
+layout(matrix(1:2, ncol = 2))
+biplot(m.pca, type = c("text", "points"), scaling = "species")
+set.seed(23)
+ev.pca <- envfit(m.pca ~ Watershed, data = design, scaling = "species")
+plot(ev.pca, labels = levels(design$Watershed), add = FALSE)
+layout(1)
+```
+\normalsize
+
+## Hierarchical analysis of crayfish --- Watershed scale
+\scriptsize
+```{r crayfish-watershed}
+m.ws <- rda(crayfish ~ Watershed, data = design)
+m.ws
+```
+\normalsize
+
+## Hierarchical analysis of crayfish --- Watershed scale
+\tiny
+```{r crayfish-watershed-2}
+summary(eigenvals(m.ws, constrained = TRUE))
+
+set.seed(1)
+ctrl <- how(nperm = 499, within = Within(type = "none"),
+            plots = with(design, Plots(strata = Stream, type = "free")))
+(sig.ws <- anova(m.ws, permutations = ctrl))
+```
+\normalsize
+
+## Hierarchical analysis of crayfish --- Stream scale
+\scriptsize
+```{r crayfish-stream}
+m.str <- rda(crayfish ~ Stream + Condition(Watershed), data = design)
+m.str
+```
+\normalsize
+
+## Hierarchical analysis of crayfish --- Stream scale
+\tiny
+```{r crayfish-stream-2}
+summary(eigenvals(m.str, constrained = TRUE))
+set.seed(1)
+ctrl <- how(nperm = 499, within = Within(type = "none"),
+            plots = with(design, Plots(strata = Reach, type = "free")),
+            blocks = with(design, Watershed))
+(sig.str <- anova(m.str, permutations = ctrl))
+```
+\normalsize
+
+## Hierarchical analysis of crayfish --- Reach scale
+\scriptsize
+```{r crayfish-reach}
+(m.re <- rda(crayfish ~ Reach + Condition(Stream), data = design))
+```
+\normalsize
+
+## Hierarchical analysis of crayfish --- Reach scale
+\scriptsize
+```{r crayfish-reach-2}
+set.seed(1)
+ctrl <- how(nperm = 499, within = Within(type = "none"),
+            plots = with(design, Plots(strata = Run, type = "free")),
+            blocks = with(design, Stream))
+(sig.re <- anova(m.re, permutations = ctrl))
+```
+\normalsize
+
+## Hierarchical analysis of crayfish --- Run scale
+\scriptsize
+```{r crayfish-run}
+(m.run <- rda(crayfish ~ Run + Condition(Reach), data = design))
+```
+\normalsize
+
+## Hierarchical analysis of crayfish --- Run scale
+\scriptsize
+```{r crayfish-run-2}
+set.seed(1)
+ctrl <- how(nperm = 499, within = Within(type = "free"),
+            blocks = with(design, Reach))
+(sig.run <- anova(m.run, permutations = ctrl))
+```
+\normalsize
+
+# Other stuff
+
+
+## Diagnostics for constrained ordinations
+
+**vegan** provides a series of diagnostics to help assess the model fit
+
+ * `goodness()`
+ * `inertcomp()`
+ * `spenvcor()`
+ * `intersetcor()`
+ * `vif.caa()`
+ 
+## Diagnostics for constrained ordinations | goodness of fit
+
+`goodness()` computes two goodness of fit statistics for species or sites
+
+Which goodness of fit measure is returned is controlled by argument `statistic`
+
+ * `statistic = "explained` (default) gives the cumulative proportion of variance explained by each axis
+ * `statistic = "distance"` gives the residual distance between the "fitted" location in constrained ordination space and the location in the full dimensional space
+
+## Diagnostics for constrained ordinations | goodness of fit
+
+\scriptsize
+```{r goodness}
+head(goodness(mods))
+head(goodness(mods, summarize = TRUE))
+```
+\normalsize
+
+## Diagnostics for constrained ordinations | inertia decomposition
+
+`inertcomp()` decomposes the variance in samples or species in partial, constrained, and unconstrained components
+
+Same two types of  measure available by argument `statistic`
+
+ * `statistic = "explained` (default) gives the decomposition in terms of variance
+ * `statistic = "distance"` gives decomposition in terms of the the residual distance
+ * Can output as proportions of total via `proportion = TRUE`
+
+\scriptsize
+```{r inertcomp}
+head(inertcomp(mods, proportional = TRUE))
+```
+\normalsize
+
+## Diagnostics for constrained ordinations | species-environment correlations
+
+`spenvcor()` returns the species-environment correlation
+
+The (weighted) correlation between the weighted average-based and the linear combination-based sets of site scores
+
+A *poor* measure of goodness of fit. Sensitive to
+
+ * outliers (like all correlations)
+ * overfitting (using too many constraints)
+
+Better models can have poorer species-environment correlations
+
+\scriptsize
+```{r spenvcor}
+spenvcor(mods)
+```
+\normalsize
+
+## Diagnostics for constrained ordinations | interset correlations
+
+`intersetcor()` returns the interset correlations; the (weighted) correlation between the weighted average-based site scores and each constraint variable
+
+Another *poor* diagnostic
+
+ * correlation based
+ * focuses on a single constraint--axis combination at a time
+
+Vector fitting (`envfit()`) or biplot scores (`scores(model, display = "bp")`) are better alternatives
+
+\scriptsize
+```{r intersetcor}
+intersetcor(mods)
+```
+\normalsize
+
+## Links
+
+I have several **vegan**-related posts on my blog. For a list of posts see [http://www.fromthebottomoftheheap.net/blog/]()
+
+## Re-use
+
+Copyright \textcopyright (2015--16) Gavin L. Simpson *Some Rights Reserved*
+
+Unless indicated otherwise, this slide deck is licensed under a [Creative Commons Attribution 4.0 International License](http://creativecommons.org/licenses/by/4.0/).
+
+\begin{center}
+  \ccby
+\end{center}
+
+## References
+
