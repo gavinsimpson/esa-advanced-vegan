@@ -8,7 +8,7 @@ $if(fontfamily)$
 $else$
 \usepackage{lmodern}
 $endif$
-\usepackage{amssymb,amsmath,mathtools}
+\usepackage{amssymb,amsmath}
 \usepackage{ifxetex,ifluatex}
 \usepackage{fixltx2e} % provides \textsubscript
 \ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
@@ -211,19 +211,6 @@ $endfor$
 \newcommand{\centreFigBegin}{\begin{figure}\centering}
 \newcommand{\centreFigEnd}{\end{figure}}
 %%
-
-$if(highlighting-macros)$
-\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}, fontsize=\tiny}
-% make console-output smaller:
-\makeatletter
-\def\verbatim{\tiny\@verbatim \frenchspacing\@vobeyspaces \@xverbatim}
-\makeatother
-\setlength{\parskip}{0pt}
-\setlength{\OuterFrameSep}{-4pt} % was -4pt
-\makeatletter
-\preto{\@verbatim}{\topsep=-10pt \partopsep=-10pt} % were -10pt
-\makeatother
-$endif$
 
 $if(title)$
 \title{$title$}
