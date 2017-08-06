@@ -1,35 +1,33 @@
 \documentclass[10pt,ignorenonframetext,compress, aspectratio=169]{beamer}
-\usetheme{m}
-\usefonttheme[onlymath]{serif}
 \setbeamertemplate{caption}[numbered]
-\setbeamertemplate{caption label separator}{:}
+\setbeamertemplate{caption label separator}{: }
 \setbeamercolor{caption name}{fg=normal text.fg}
-\usepackage{amssymb,amsmath}
-% mathtools for underbracket
-\usepackage{mathtools}
-% \usepackage{ifxetex,ifluatex} % m theme needs xelatex
+\beamertemplatenavigationsymbolsempty
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath,mathtools}
+\usepackage{ifxetex,ifluatex}
 \usepackage{fixltx2e} % provides \textsubscript
-% \usepackage{lmodern} kills bullets m theme
-% \ifxetex
-\usepackage{xltxtra,xunicode}
-%\usepackage{fontspec}
-%\defaultfontfeatures{Mapping=tex-text,Scale=MatchLowercase}
-\defaultfontfeatures{Scale=MatchLowercase}
-%\newcommand{\euro}{€}
-% \else
-%   \ifluatex
-%     \usepackage{fontspec}
-%     \defaultfontfeatures{Mapping=tex-text,Scale=MatchLowercase}
-%     \newcommand{\euro}{€}
-%   \else
-%     \usepackage[T1]{fontenc}
-%     \usepackage[utf8]{inputenc}
-%     %   \fi
-% \fi
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  %%\defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+  \defaultfontfeatures{Scale=MatchLowercase}
+\fi
+\usetheme[]{m}
 % use upquote if available, for straight quotes in verbatim environments
 \IfFileExists{upquote.sty}{\usepackage{upquote}}{}
 % use microtype if available
-%\IfFileExists{microtype.sty}{\usepackage{microtype}}{}
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\newif\ifbibliography
 \usepackage{color}
 \usepackage{fancyvrb}
 \newcommand{\VerbBar}{|}
@@ -44,34 +42,55 @@
 \newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
 \newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
 \newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
 \newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
 \newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\ImportTok}[1]{{#1}}
 \newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{{#1}}}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
 \newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{{#1}}}
-\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{{#1}}}
 \newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{{#1}}}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{{#1}}}}
+\newcommand{\BuiltInTok}[1]{{#1}}
+\newcommand{\ExtensionTok}[1]{{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{{#1}}}
 \newcommand{\RegionMarkerTok}[1]{{#1}}
-\newcommand{\ErrorTok}[1]{\textbf{{#1}}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{{#1}}}}
 \newcommand{\NormalTok}[1]{{#1}}
-\usepackage{url}
 
-% Comment these out if you don't want a slide with just the
-% part/section/subsection/subsubsection title:
-% \AtBeginPart{
-%   \let\insertpartnumber\relax
-%   \let\partname\relax
-%   \frame{\partpage}
-% }
-% \AtBeginSection{
-%   \let\insertsectionnumber\relax
-%   \let\sectionname\relax
-%   \frame{\sectionpage}
-% }
-% \AtBeginSubsection{
-%   \let\insertsubsectionnumber\relax
-%   \let\subsectionname\relax
-%   \frame{\subsectionpage}
-% }
+% Prevent slide breaks in the middle of a paragraph:
+\widowpenalties 1 10000
+\raggedbottom
+
+\AtBeginPart{
+  \let\insertpartnumber\relax
+  \let\partname\relax
+  \frame{\partpage}
+}
+\AtBeginSection{
+  \ifbibliography
+  \else
+    \let\insertsectionnumber\relax
+    \let\sectionname\relax
+    \frame{\sectionpage}
+  \fi
+}
+\AtBeginSubsection{
+  \let\insertsubsectionnumber\relax
+  \let\subsectionname\relax
+  \frame{\subsectionpage}
+}
 
 \usepackage[normalem]{ulem}
 % avoid problems with \sout in headers with hyperref:
@@ -79,8 +98,11 @@
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{6pt plus 2pt minus 1pt}
 \setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 \setcounter{secnumdepth}{0}
 
+%% GLS Added
 % Textcomp for various common symbols
 \usepackage{textcomp}
 
@@ -94,11 +116,22 @@
 \newcommand{\columnsend}{\end{columns}}
 \newcommand{\centreFigBegin}{\begin{figure}\centering}
 \newcommand{\centreFigEnd}{\end{figure}}
+%%
 
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}, fontsize=\tiny}
+% make console-output smaller:
+\makeatletter
+\def\verbatim{\tiny\@verbatim \frenchspacing\@vobeyspaces \@xverbatim}
+\makeatother
+\setlength{\parskip}{0pt}
+\setlength{\OuterFrameSep}{-4pt} % was -4pt
+\makeatletter
+\preto{\@verbatim}{\topsep=-10pt \partopsep=-10pt} % were -10pt
+\makeatother
 
 \title{Advanced Community Data Analysis Using Vegan}
 \author{Gavin L. Simpson}
-\date{ESA 2016 • Aug 9th 2016}
+\date{ESA 2017 • Aug 6th 2017}
 
 \begin{document}
 \frame{\titlepage}
@@ -109,20 +142,20 @@
 
 All slides and materials are online on Git hub:
 
-\href{}{\url{https://github.com/gavinsimpson/esa-advanced-vegan-2016}}
+\href{}{https://github.com/gavinsimpson/esa-advanced-vegan-2016}
 
 \end{frame}
 
 \section{Constrained Ordination}\label{constrained-ordination}
 
-\begin{frame}{Canonical Correspondence Analysis}
+\begin{frame}[fragile]{Canonical Correspondence Analysis}
 
 CCA is the constrained form of CA; fitted using \texttt{cca()}.
 
 Two interfaces for specifying models
 
 \begin{itemize}
-\itemsep1pt\parskip0pt\parsep0pt
+\tightlist
 \item
   basic;
   \texttt{cca1\ \textless{}-\ cca(X\ =\ varespec,\ Y\ =\ varechem)}
@@ -209,10 +242,10 @@ Eigenvalues for unconstrained axes:
 
 \end{frame}
 
-\begin{frame}{The \texttt{cca.object}}
+\begin{frame}[fragile]{The \texttt{cca.object}}
 
 \begin{itemize}
-\itemsep1pt\parskip0pt\parsep0pt
+\tightlist
 \item
   Objects of class \texttt{"cca"} are complex with many components
 \item
@@ -226,12 +259,12 @@ Eigenvalues for unconstrained axes:
 
 \end{frame}
 
-\begin{frame}{The \texttt{cca.object}}
+\begin{frame}[fragile]{The \texttt{cca.object}}
 
 \texttt{cca1} has a large number of components
 
 \begin{itemize}
-\itemsep1pt\parskip0pt\parsep0pt
+\tightlist
 \item
   \textbf{\texttt{\$call}} how the function was called
 \item
@@ -256,7 +289,7 @@ Eigenvalues for unconstrained axes:
 
 \end{frame}
 
-\begin{frame}{The \texttt{cca.object}}
+\begin{frame}[fragile]{The \texttt{cca.object}}
 
 Depending on how one called \texttt{cca()} etc some of these components
 will be \texttt{NULL}
@@ -307,7 +340,7 @@ object
 \begin{frame}[fragile]{Your turn}
 
 \begin{itemize}
-\itemsep1pt\parskip0pt\parsep0pt
+\tightlist
 \item
   Fit a CCA model to the lichen pasture data. The model should include,
   N, P, and K only.
@@ -329,13 +362,13 @@ object
 
 \end{frame}
 
-\begin{frame}{Extracting axis scores}
+\begin{frame}[fragile]{Extracting axis scores}
 
 To extract a range of scores from a fitted ordination use
 \texttt{scores()}
 
 \begin{itemize}
-\itemsep1pt\parskip0pt\parsep0pt
+\tightlist
 \item
   takes an ordination object as the first argument
 \item
@@ -344,7 +377,7 @@ To extract a range of scores from a fitted ordination use
   \texttt{display} --- which type(s) of scores to return
 
   \begin{itemize}
-  \itemsep1pt\parskip0pt\parsep0pt
+  \tightlist
   \item
     \texttt{"sites"} or \texttt{"wa"}: scores for samples in response
     matrix
@@ -410,7 +443,7 @@ Can't display all of these and maintain relationships between the scores
 \texttt{scaling} argument
 
 \begin{itemize}
-\itemsep1pt\parskip0pt\parsep0pt
+\tightlist
 \item
   \texttt{scaling\ =\ 1} --- Focus on sites, scale site scores by
   \(\lambda_i\)
@@ -446,12 +479,12 @@ Can't display all of these and maintain relationships between the scores
 
 \end{frame}
 
-\begin{frame}{Scalings\ldots{}}
+\begin{frame}[fragile]{Scalings\ldots{}}
 
 Thankfully we can use alternative descrpitors to extract scores:
 
 \begin{itemize}
-\itemsep1pt\parskip0pt\parsep0pt
+\tightlist
 \item
   \texttt{"none"}
 \item
@@ -466,7 +499,7 @@ Two modifiers select negative scores depending on whether the model is
 CCA or RDA:
 
 \begin{itemize}
-\itemsep1pt\parskip0pt\parsep0pt
+\tightlist
 \item
   \texttt{hill\ =\ TRUE}
 \item
@@ -478,7 +511,7 @@ CCA or RDA:
 \begin{frame}{Your turn}
 
 \begin{itemize}
-\itemsep1pt\parskip0pt\parsep0pt
+\tightlist
 \item
   Using the CCA model you fitted, extract the site scores for axes 2 and
   3 with Hill's scaling
@@ -530,10 +563,10 @@ recipe for a mess\ldots{} but we can do it
 
 \end{frame}
 
-\begin{frame}{Your turn}
+\begin{frame}[fragile]{Your turn}
 
 \begin{itemize}
-\itemsep1pt\parskip0pt\parsep0pt
+\tightlist
 \item
   Using \texttt{mycca}, draw a triplot of axes 2 and 3 with sites
   scaling
@@ -544,7 +577,7 @@ recipe for a mess\ldots{} but we can do it
 
 \end{frame}
 
-\begin{frame}{Building constrained ordination models}
+\begin{frame}[fragile]{Building constrained ordination models}
 
 If we don't want to think it's easy to fit a poor model with many
 constraints
@@ -600,13 +633,13 @@ Eigenvalues for unconstrained axes:
 
 \end{frame}
 
-\begin{frame}{Building constrained ordination models}
+\begin{frame}[fragile]{Building constrained ordination models}
 
 For CCA we have little choice but to do
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
-\itemsep1pt\parskip0pt\parsep0pt
+\tightlist
 \item
   Fit well-chosen set of candidate models \& compare, or
 \item
@@ -625,7 +658,7 @@ and \texttt{drop1()}
 
 \end{frame}
 
-\begin{frame}{Variance inflation factors}
+\begin{frame}[fragile]{Variance inflation factors}
 
 \emph{Linear} dependencies between constraints can be investigated via
 the \emph{variance inflation factor} or VIF
@@ -636,7 +669,7 @@ inflated by presence of other covariates
 Lots of rules of thumb
 
 \begin{itemize}
-\itemsep1pt\parskip0pt\parsep0pt
+\tightlist
 \item
   VIF \textgreater{}= 20 indicates \emph{strong collinearity} in
   constraints
@@ -655,7 +688,7 @@ function \texttt{ordistep()}
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
-\itemsep1pt\parskip0pt\parsep0pt
+\tightlist
 \item
   Define an upper and lower model scope, say the full model and the null
   model
@@ -788,13 +821,13 @@ Eigenvalues for unconstrained axes:
 
 \end{frame}
 
-\begin{frame}{Adjusted \(R^2\) for \emph{linear} models}
+\begin{frame}[fragile]{Adjusted \(R^2\) for \emph{linear} models}
 
 As with ordinary \(R^2\), that of an RDA is biased for the same reasons
 as for a linear regression
 
 \begin{itemize}
-\itemsep1pt\parskip0pt\parsep0pt
+\tightlist
 \item
   adding a variable to constraints will increase \(R^2\)
 \item
@@ -808,7 +841,7 @@ measure
 \[R^2_{adj} = 1 - \frac{n - 1}{n - m - 1}(1 - R^2)\]
 
 \begin{itemize}
-\itemsep1pt\parskip0pt\parsep0pt
+\tightlist
 \item
   \(n\) is number of samples \(m\) is number of constraints (model
   degrees of freedom)
@@ -822,7 +855,7 @@ measure
 
 \end{frame}
 
-\begin{frame}{Stepwise selection via adjusted \(R^2\)}
+\begin{frame}[fragile]{Stepwise selection via adjusted \(R^2\)}
 
 The problems with stepwise selection in regression models are myriad.
 Affects RDA, CCA, etc as well
@@ -831,12 +864,12 @@ Blanchet, Legendre, and Borcard (2008) proposed a two-step solution for
 models where \(R^2_{adj}\) makes sense
 
 \begin{itemize}
-\itemsep1pt\parskip0pt\parsep0pt
+\tightlist
 \item
   \emph{Global test} of all constraints
 
   \begin{itemize}
-  \itemsep1pt\parskip0pt\parsep0pt
+  \tightlist
   \item
     Proceed \textbf{only} if this test is significant
   \item
@@ -846,7 +879,7 @@ models where \(R^2_{adj}\) makes sense
   Proceed with forward selection, but with \emph{two} stopping rules
 
   \begin{itemize}
-  \itemsep1pt\parskip0pt\parsep0pt
+  \tightlist
   \item
     Usual significance threshold \(\alpha\)
   \item
@@ -876,13 +909,13 @@ effect}
 
 \end{frame}
 
-\begin{frame}{Permutation tests in vegan}
+\begin{frame}[fragile]{Permutation tests in vegan}
 
 What \emph{is} shuffled and \emph{how} is of \textbf{paramount}
 importance for the test to be valid
 
 \begin{itemize}
-\itemsep1pt\parskip0pt\parsep0pt
+\tightlist
 \item
   No conditioning (partial) variables then rows of the species data are
   permuted
@@ -891,7 +924,7 @@ importance for the test to be valid
   \emph{permute residuals} from model fits
 
   \begin{itemize}
-  \itemsep1pt\parskip0pt\parsep0pt
+  \tightlist
   \item
     The \emph{full model} uses residuals from model
     \(Y = X + Z + \varepsilon\)
@@ -927,7 +960,7 @@ Evaluate whether \(F\) is unusually large relative to the null
 \begin{frame}[fragile]{Permutation tests in vegan: \texttt{anova()}}
 
 \begin{itemize}
-\itemsep1pt\parskip0pt\parsep0pt
+\tightlist
 \item
   The main user function is the \texttt{anova()} method
 \item
@@ -968,7 +1001,7 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 \begin{frame}[fragile]{Permutation tests in vegan: \texttt{anova()}}
 
 \begin{itemize}
-\itemsep1pt\parskip0pt\parsep0pt
+\tightlist
 \item
   \texttt{anova.cca()} has a number of arguments
 \end{itemize}
@@ -991,7 +1024,7 @@ NULL
 \normalsize
 
 \begin{itemize}
-\itemsep1pt\parskip0pt\parsep0pt
+\tightlist
 \item
   \texttt{object} is the fitted ordination
 \item
@@ -1003,12 +1036,12 @@ NULL
 
 \end{frame}
 
-\begin{frame}{Types of permutation test in vegan}
+\begin{frame}[fragile]{Types of permutation test in vegan}
 
 A number of types of test can be envisaged
 
 \begin{itemize}
-\itemsep1pt\parskip0pt\parsep0pt
+\tightlist
 \item
   Testing the overall significance of the model
 \item
@@ -1029,7 +1062,7 @@ The other three can be selected via the argument \texttt{by}
 axes}
 
 \begin{itemize}
-\itemsep1pt\parskip0pt\parsep0pt
+\tightlist
 \item
   The constrained (canonical) axes can be individually tests by
   specifying \texttt{by\ =\ "axis"}
@@ -1074,7 +1107,7 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 sequentially}
 
 \begin{itemize}
-\itemsep1pt\parskip0pt\parsep0pt
+\tightlist
 \item
   The individual terms in the model can be tested using
   \texttt{by\ =\ "terms"}
@@ -1121,7 +1154,7 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 marginal effects}
 
 \begin{itemize}
-\itemsep1pt\parskip0pt\parsep0pt
+\tightlist
 \item
   The marginal \emph{effect} of a model term can be assessed using
   \texttt{by\ =\ "margin"}
@@ -1406,7 +1439,7 @@ hypothesis where all observations are \emph{independent}
 Ecological / environmental data often aren't independent
 
 \begin{itemize}
-\itemsep1pt\parskip0pt\parsep0pt
+\tightlist
 \item
   Temporal or spatial correlation
 \item
@@ -1426,7 +1459,7 @@ Trick is to shuffle the data whilst preserving that dependence
 
 \end{frame}
 
-\begin{frame}{Restricted permutations}
+\begin{frame}[fragile]{Restricted permutations}
 
 Canoco has had restricted permutations for a \emph{long} time.
 \textbf{vegan} has only recently caught up \& we're not (quite) there
@@ -1456,7 +1489,7 @@ Braak when it didn't do what he wanted!
 Samples can be thought of as belonging to three levels of a hierarchy
 
 \begin{itemize}
-\itemsep1pt\parskip0pt\parsep0pt
+\tightlist
 \item
   the \emph{sample} level; how are individual samples permuted
 \item
@@ -1482,7 +1515,7 @@ four simple permutation types
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
-\itemsep1pt\parskip0pt\parsep0pt
+\tightlist
 \item
   Free permutation (randomisation)
 \item
@@ -1501,7 +1534,8 @@ time series
 
 \end{frame}
 
-\begin{frame}{Restricted permutations with permute \textbar{} blocks}
+\begin{frame}[fragile]{Restricted permutations with permute \textbar{}
+blocks}
 
 Blocks are a random factor that does not interact with factors that vary
 within blocks
@@ -1602,7 +1636,7 @@ Split-plot designs are hierarchical with two levels of units
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
-\itemsep1pt\parskip0pt\parsep0pt
+\tightlist
 \item
   \textbf{whole-plots} , which contain
 \item
@@ -1623,7 +1657,7 @@ whole-plots
 
 \end{frame}
 
-\begin{frame}{Restricted permutations with permute \textbar{}
+\begin{frame}[fragile]{Restricted permutations with permute \textbar{}
 whole-plots \& split-plots II}
 
 Whole-plots or split-plots can be time series, linear transects or
@@ -1649,7 +1683,8 @@ is equal to that at lag -\emph{h} (also in a trend-free time series)
 
 \end{frame}
 
-\begin{frame}{Restricted permutations with permute \textbar{} mirroring}
+\begin{frame}[fragile]{Restricted permutations with permute \textbar{}
+mirroring}
 
 Hence the series \texttt{(1,\ 2,\ 3,\ 4)} and \texttt{(4,\ 3,\ 2,\ 1)}
 are equivalent fom this point of view \& we can draw permutations from
@@ -1663,8 +1698,8 @@ permutations
 
 \end{frame}
 
-\begin{frame}{Restricted permutations with permute \textbar{} the set of
-permutations}
+\begin{frame}[fragile]{Restricted permutations with permute \textbar{}
+the set of permutations}
 
 Using restricted permutations can severely reduce the size of the set of
 allowed permutations
@@ -1676,7 +1711,7 @@ the ability to detect signal/pattern
 If we don't want mirroring
 
 \begin{itemize}
-\itemsep1pt\parskip0pt\parsep0pt
+\tightlist
 \item
   in a time series of 20 samples the minimum \emph{p} is 1/20 (0.05)
 \item
@@ -1694,15 +1729,15 @@ from the set
 
 \end{frame}
 
-\begin{frame}{Restricted permutations with permute \textbar{} designing
-permutation schemes}
+\begin{frame}[fragile]{Restricted permutations with permute \textbar{}
+designing permutation schemes}
 
 In \textbf{permute}, we set up a permutation scheme with \texttt{how()}
 
 We sample from the permutation scheme with
 
 \begin{itemize}
-\itemsep1pt\parskip0pt\parsep0pt
+\tightlist
 \item
   \texttt{shuffle()}, which gives a single draw from scheme, or
 \item
@@ -1723,7 +1758,7 @@ designing permutation schemes}
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
-\itemsep1pt\parskip0pt\parsep0pt
+\tightlist
 \item
   \texttt{within} --- takes input from helper \texttt{Within()}
 \item
@@ -1789,7 +1824,7 @@ heuristics that kick in to stop you shooting yourself in the foot and
 demanding 9999 permutations when there are only 10
 
 \begin{itemize}
-\itemsep1pt\parskip0pt\parsep0pt
+\tightlist
 \item
   \texttt{complete} should we enumerate the entire set of permutations?
 \item
@@ -1877,8 +1912,8 @@ each
 
 \section{Ohraz Case Study}\label{ohraz-case-study}
 
-\begin{frame}{Restricted permutations with permute \textbar{} worked
-example with vegan}
+\begin{frame}[fragile]{Restricted permutations with permute \textbar{}
+worked example with vegan}
 
 Now we've seen how to drive \textbf{permute}, we can use the same
 \texttt{how()} commands to set up permutation designs within
@@ -1889,7 +1924,7 @@ Analyse the Ohraz data Case study 5 of Leps \& Smilauer
 Repeated observations of composition from an experiment
 
 \begin{itemize}
-\itemsep1pt\parskip0pt\parsep0pt
+\tightlist
 \item
   Factorial design (3 replicates)
 \item
@@ -2425,13 +2460,13 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 \section{Other stuff}\label{other-stuff}
 
-\begin{frame}{Diagnostics for constrained ordinations}
+\begin{frame}[fragile]{Diagnostics for constrained ordinations}
 
 \textbf{vegan} provides a series of diagnostics to help assess the model
 fit
 
 \begin{itemize}
-\itemsep1pt\parskip0pt\parsep0pt
+\tightlist
 \item
   \texttt{goodness()}
 \item
@@ -2446,8 +2481,8 @@ fit
 
 \end{frame}
 
-\begin{frame}{Diagnostics for constrained ordinations \textbar{}
-goodness of fit}
+\begin{frame}[fragile]{Diagnostics for constrained ordinations
+\textbar{} goodness of fit}
 
 \texttt{goodness()} computes two goodness of fit statistics for species
 or sites
@@ -2456,7 +2491,7 @@ Which goodness of fit measure is returned is controlled by argument
 \texttt{statistic}
 
 \begin{itemize}
-\itemsep1pt\parskip0pt\parsep0pt
+\tightlist
 \item
   \texttt{statistic\ =\ "explained} (default) gives the cumulative
   proportion of variance explained by each axis
@@ -2513,7 +2548,7 @@ partial, constrained, and unconstrained components
 Same two types of measure available by argument \texttt{statistic}
 
 \begin{itemize}
-\itemsep1pt\parskip0pt\parsep0pt
+\tightlist
 \item
   \texttt{statistic\ =\ "explained} (default) gives the decomposition in
   terms of variance
@@ -2557,7 +2592,7 @@ linear combination-based sets of site scores
 A \emph{poor} measure of goodness of fit. Sensitive to
 
 \begin{itemize}
-\itemsep1pt\parskip0pt\parsep0pt
+\tightlist
 \item
   outliers (like all correlations)
 \item
@@ -2593,7 +2628,7 @@ constraint variable
 Another \emph{poor} diagnostic
 
 \begin{itemize}
-\itemsep1pt\parskip0pt\parsep0pt
+\tightlist
 \item
   correlation based
 \item
@@ -2625,7 +2660,7 @@ K  -0.3768462 -0.1339192 0.7760441
 \begin{frame}{Links}
 
 I have several \textbf{vegan}-related posts on my blog. For a list of
-posts see \href{}{\url{http://www.fromthebottomoftheheap.net/blog/}}
+posts see \href{}{http://www.fromthebottomoftheheap.net/blog/}
 
 \end{frame}
 
@@ -2642,11 +2677,12 @@ Attribution 4.0 International License}.
   \ccby
 \end{center}
 
-\hyperdef{}{references}{}
-\subsection*{References}\label{references}
-\addcontentsline{toc}{subsection}{References}
+\end{frame}
 
-\hyperdef{}{ref-Blanchet2008}{}
+\begin{frame}{References}
+
+\hypertarget{refs}{}
+\hypertarget{ref-Blanchet2008}{}
 Blanchet, F Guillaume, Pierre Legendre, and Daniel Borcard. 2008.
 ``Forward Selection of Explanatory Variables.'' \emph{Ecology} 89 (9).
 Eco Soc America: 2623--32.
