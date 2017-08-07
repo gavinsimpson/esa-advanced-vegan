@@ -40,7 +40,11 @@ data(varechem)
 
 All slides and materials are online on Git hub:
 
-[https://github.com/gavinsimpson/esa-advanced-vegan-2016]()
+[github.com/gavinsimpson/esa-advanced-vegan](https://github.com/gavinsimpson/esa-advanced-vegan)
+
+Direct download a ZIP of everything: [**bit.ly/veganesa17**](http://bit.ly/veganesa17)
+
+Unpack the zip & remember where you put it
 
 # Constrained Ordination
 
@@ -379,7 +383,7 @@ What *is* shuffled and *how* is of **paramount** importance for the test to be v
  * No conditioning (partial) variables then rows of the species data are permuted
  * With conditioning variables, two options are available, both of which *permute residuals* from model fits
      - The *full model* uses residuals from model $Y = X + Z + \varepsilon$
-     - The *reduced model* uses residuals from model $Y = X + Z + \varepsilon$
+     - The *reduced model* uses residuals from model $Y = Z + \varepsilon$
  * In **vegan** which is used can be set via argument `model` with `"direct"`, ~~`"full"`~~, and `"reduced"` respectively
  * In current **vegan** option `method = "full"` is disabled
 
@@ -887,7 +891,7 @@ anova(c1, permutations = h, model = "reduced", by = "axis")
 
 Variation in communities may exist at various scales, sometimes hierarchically
 
-A firt step in understanding this variation is to test for its exisistence
+A first step in understanding this variation is to test for its exisistence
 
 In this example from Leps & Smilauer (2014) uses crayfish data from Spring River, Arkansas/Missouri, USA, collected by Dr.~Camille Flinders.
 
@@ -1092,7 +1096,7 @@ I have several **vegan**-related posts on my blog. For a list of posts see [http
 
 ## Re-use
 
-Copyright \textcopyright (2015--16) Gavin L. Simpson *Some Rights Reserved*
+Copyright \textcopyright (2015--17) Gavin L. Simpson *Some Rights Reserved*
 
 Unless indicated otherwise, this slide deck is licensed under a [Creative Commons Attribution 4.0 International License](http://creativecommons.org/licenses/by/4.0/).
 
